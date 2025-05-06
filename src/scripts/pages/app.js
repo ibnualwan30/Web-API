@@ -1,5 +1,6 @@
 import routes from '../routes/routes';
 import { getActiveRoute } from '../routes/url-parser';
+import ViewTransition from '../utils/view-transition';
 
 class App {
   #content = null;
@@ -28,16 +29,37 @@ class App {
         if (link.contains(event.target)) {
           this.#navigationDrawer.classList.remove('open');
         }
-      })
+      });
     });
   }
 
   async renderPage() {
     const url = getActiveRoute();
-    const page = routes[url];
-
-    this.#content.innerHTML = await page.render();
-    await page.afterRender();
+    let page = routes[url];
+    
+    // Periksa apakah URL memiliki parameter ID
+    if (url.includes(':id')) {
+      const pathSegments = window.location.hash.substring(1).split('/');
+      if (pathSegments.length >= 2) {
+        const dynamicRoute = `/${pathSegments[1]}/:id`;
+        page = routes[dynamicRoute];
+      }
+    }
+    
+    if (!page) {
+      page = routes['/'];
+    }
+    
+    // Gunakan View Transition API jika tersedia
+    if (document.startViewTransition) {
+      document.startViewTransition(async () => {
+        this.#content.innerHTML = await page.render();
+        await page.afterRender();
+      });
+    } else {
+      this.#content.innerHTML = await page.render();
+      await page.afterRender();
+    }
   }
 }
 
