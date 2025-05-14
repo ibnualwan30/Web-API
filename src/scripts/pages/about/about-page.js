@@ -1,3 +1,8 @@
+// src/scripts/pages/about/about-page.js
+
+import AboutView from '../../mvp/view/about-view';
+import AboutPresenter from '../../mvp/presenter/AboutPresenter';
+
 export default class AboutPage {
   async render() {
     return `
@@ -33,12 +38,18 @@ export default class AboutPage {
             <li>Label yang terasosiasi dengan form control</li>
             <li>Kontras warna yang memadai</li>
           </ul>
-        
+        </div>
       </section>
     `;
   }
 
   async afterRender() {
-    // Tidak ada fungsionalitas khusus yang perlu ditambahkan di halaman About
+    // Inisialisasi View
+    const view = new AboutView();
+    
+    // Inisialisasi Presenter
+    new AboutPresenter({
+      view
+    });
   }
 }

@@ -1,6 +1,10 @@
-import StoryAPI from '../../data/story-api';
-import ViewTransition from '../../utils/view-transition';
+// src/scripts/pages/auth/login-page.js
 
+import LoginView from '../../mvp/view/login-view';
+import LoginPresenter from '../../mvp/presenter/LoginPresenter';
+import StoryAPI from '../../data/story-api';
+import AuthRepository from '../../data/auth-repository';
+import AuthModel from '../../mvp/model/AuthModel';
 
 export default class LoginPage {
   async render() {
@@ -32,32 +36,23 @@ export default class LoginPage {
   }
 
   async afterRender() {
-    const loginForm = document.getElementById('login-form');
-    const errorContainer = document.getElementById('error-container');
-    
-    loginForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      
-      try {
-        await StoryAPI.login(email, password);
-        
-        
-        ViewTransition.transit(() => {
-          window.location.hash = '#/';
-        });
-      } catch (error) {
-        errorContainer.textContent = error.message || 'Login gagal. Silakan coba lagi.';
-      }
-    });
-    
     // Implementasi skip-link
     const skipLink = document.querySelector('.skip-link');
     skipLink.addEventListener('click', (event) => {
       event.preventDefault();
       document.getElementById('login-form').focus();
+    });
+    
+    // Inisialisasi View
+    const view = new LoginView();
+    
+    // Inisialisasi Model
+    const authModel = new AuthModel(StoryAPI, AuthRepository);
+    
+    // Inisialisasi Presenter
+    new LoginPresenter({
+      view,
+      authModel
     });
   }
 }

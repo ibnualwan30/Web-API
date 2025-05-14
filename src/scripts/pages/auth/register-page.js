@@ -1,5 +1,10 @@
+// src/scripts/pages/auth/register-page.js
+
+import RegisterView from '../../mvp/view/register-view';
+import RegisterPresenter from '../../mvp/presenter/RegisterPresenter';
 import StoryAPI from '../../data/story-api';
-import ViewTransition from '../../utils/view-transition';
+import AuthRepository from '../../data/auth-repository';
+import AuthModel from '../../mvp/model/AuthModel';
 
 export default class RegisterPage {
   async render() {
@@ -37,37 +42,23 @@ export default class RegisterPage {
   }
 
   async afterRender() {
-    const registerForm = document.getElementById('register-form');
-    const errorContainer = document.getElementById('error-container');
-    
-    registerForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      
-      try {
-        await StoryAPI.register(name, email, password);
-        
-        errorContainer.className = 'success-container';
-        errorContainer.textContent = 'Registrasi berhasil! Silakan login.';
-        
-        setTimeout(() => {
-          ViewTransition.transit(() => {
-            window.location.hash = '#/login';
-          });
-        }, 2000);
-      } catch (error) {
-        errorContainer.className = 'error-container';
-        errorContainer.textContent = error.message || 'Registrasi gagal. Silakan coba lagi.';
-      }
-    });
-    
+    // Implementasi skip-link
     const skipLink = document.querySelector('.skip-link');
     skipLink.addEventListener('click', (event) => {
       event.preventDefault();
       document.getElementById('register-form').focus();
+    });
+    
+    // Inisialisasi View
+    const view = new RegisterView();
+    
+    // Inisialisasi Model
+    const authModel = new AuthModel(StoryAPI, AuthRepository);
+    
+    // Inisialisasi Presenter
+    new RegisterPresenter({
+      view,
+      authModel
     });
   }
 }

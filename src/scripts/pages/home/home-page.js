@@ -1,7 +1,11 @@
+// src/scripts/pages/home/home-page.js
+
 import StoryAPI from '../../data/story-api';
-import { showFormattedDate } from '../../utils';
-import ViewTransition from '../../utils/view-transition';
 import AuthRepository from '../../data/auth-repository';
+import HomeView from '../../mvp/view/home-view';
+import HomePresenter from '../../mvp/presenter/HomePresenter';
+import StoryModel from '../../mvp/model/StoryModel';
+import AuthModel from '../../mvp/model/AuthModel';
 
 export default class HomePage {
   async render() {
@@ -21,6 +25,14 @@ export default class HomePage {
             <h2 tabindex="0">Cerita Terbaru</h2>
             <div id="stories-container" class="stories-container">
               <p>Loading stories...</p>
+            </div>
+          </section>
+          
+          <!-- Penambahan Container untuk Peta -->
+          <section class="map-section">
+            <h2 tabindex="0">Peta Cerita</h2>
+            <div id="map-container" class="map-container">
+              <div id="map" class="stories-map"></div>
             </div>
           </section>
         </main>
@@ -47,25 +59,6 @@ export default class HomePage {
   }
 
   async afterRender() {
-    // Periksa otentikasi
-    if (!AuthRepository.isAuthenticated()) {
-      ViewTransition.transit(() => {
-        window.location.hash = '#/login';
-      });
-      return;
-    }
-    
-    // Setup event listener untuk logout
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-      logoutButton.addEventListener('click', () => {
-        StoryAPI.logout();
-        ViewTransition.transit(() => {
-          window.location.hash = '#/login';
-        });
-      });
-    }
-    
     // Implementasi skip-link
     const skipLink = document.querySelector('.skip-link');
     skipLink.addEventListener('click', (event) => {
@@ -73,51 +66,18 @@ export default class HomePage {
       document.getElementById('main-content').focus();
     });
     
-    // Ambil dan tampilkan cerita
-    await this._loadStories();
-  }
-  
-  async _loadStories() {
-    const storiesContainer = document.getElementById('stories-container');
+    // Inisialisasi View
+    const view = new HomeView();
     
-    try {
-      const stories = await StoryAPI.getAllStories();
-      
-      if (stories.length === 0) {
-        storiesContainer.innerHTML = '<p class="empty-state">Belum ada cerita yang tersedia.</p>';
-        return;
-      }
-      
-      storiesContainer.innerHTML = '';
-      
-      stories.forEach((story) => {
-        storiesContainer.innerHTML += this._createStoryItemTemplate(story);
-      });
-      
-      // Tambahkan event listener pada setiap item
-      document.querySelectorAll('.story-item').forEach((item) => {
-        item.addEventListener('click', (event) => {
-          const storyId = item.dataset.id;
-          ViewTransition.transit(() => {
-            window.location.hash = `#/detail/${storyId}`;
-          });
-        });
-      });
-    } catch (error) {
-      storiesContainer.innerHTML = `<p class="error-message">Error loading stories: ${error.message}</p>`;
-    }
-  }
-  
-  _createStoryItemTemplate(story) {
-    return `
-      <article class="story-item" data-id="${story.id}">
-        <img src="${story.photoUrl}" alt="Gambar cerita dari ${story.name}" class="story-image">
-        <div class="story-content">
-          <h3 class="story-name">${story.name}</h3>
-          <p class="story-description">${story.description.substring(0, 150)}${story.description.length > 150 ? '...' : ''}</p>
-          <p class="story-date">${showFormattedDate(story.createdAt)}</p>
-        </div>
-      </article>
-    `;
+    // Inisialisasi Model
+    const storyModel = new StoryModel(StoryAPI);
+    const authModel = new AuthModel(StoryAPI, AuthRepository);
+    
+    // Inisialisasi Presenter
+    new HomePresenter({
+      view,
+      storyModel,
+      authModel
+    });
   }
 }
