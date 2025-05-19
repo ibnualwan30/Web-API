@@ -2,8 +2,8 @@
 
 export default class HomeView {
   constructor() {
-    this._storiesContainer = document.getElementById('stories-container');
-    this._mapContainer = document.getElementById('map-container');
+    this._storiesContainer = null;
+    this._mapContainer = null;
     this._map = null;
     this._markersLayer = null;
     this._presenter = null;
@@ -11,6 +11,11 @@ export default class HomeView {
 
   initView(presenter) {
     this._presenter = presenter;
+    
+    // Initialize DOM elements
+    this._storiesContainer = document.getElementById('stories-container');
+    this._mapContainer = document.getElementById('map-container');
+    
     this.setLogoutHandler();
   }
 
@@ -20,6 +25,12 @@ export default class HomeView {
       logoutButton.addEventListener('click', () => {
         this._presenter.handleLogout();
       });
+    }
+  }
+
+  showLoading() {
+    if (this._storiesContainer) {
+      this._storiesContainer.innerHTML = '<p class="loading">Loading stories...</p>';
     }
   }
 

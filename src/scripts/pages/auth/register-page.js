@@ -12,9 +12,9 @@ export default class RegisterPage {
       <div class="auth-container container">
         <h1 tabindex="0">Register</h1>
         
-        <a href="#" class="skip-link">Skip to content</a>
+        <a href="#register-form" class="skip-link">Skip to content</a>
         
-        <form id="register-form" class="auth-form">
+        <form id="register-form" class="auth-form" tabindex="-1">
           <div class="form-group">
             <label for="name">Nama</label>
             <input type="text" id="name" name="name" required>
@@ -42,12 +42,19 @@ export default class RegisterPage {
   }
 
   async afterRender() {
-    // Implementasi skip-link
+    // Implementasi skip-link dengan perbaikan
     const skipLink = document.querySelector('.skip-link');
-    skipLink.addEventListener('click', (event) => {
-      event.preventDefault();
-      document.getElementById('register-form').focus();
-    });
+    const registerForm = document.getElementById('register-form');
+    
+    if (skipLink && registerForm) {
+      skipLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        // Pastikan element ada sebelum memanggil focus()
+        if (registerForm) {
+          registerForm.focus();
+        }
+      });
+    }
     
     // Inisialisasi View
     const view = new RegisterView();

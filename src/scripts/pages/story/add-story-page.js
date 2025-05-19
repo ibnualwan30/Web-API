@@ -63,14 +63,17 @@ export default class AddStoryPage {
   }
 
   async afterRender() {
-    // Implementasi skip-link
+    // Implementasi skip-link - perbaikan untuk memastikan element ada sebelum fokus
     const skipLink = document.querySelector('.skip-link');
     const mainContent = document.getElementById('mainContent');
     
     if (skipLink && mainContent) {
       skipLink.addEventListener('click', (event) => {
         event.preventDefault();
-        mainContent.focus();
+        // Pastikan element ada sebelum memanggil focus()
+        if (mainContent) {
+          mainContent.focus();
+        }
       });
     }
     

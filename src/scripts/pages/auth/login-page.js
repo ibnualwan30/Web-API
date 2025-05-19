@@ -36,14 +36,17 @@ export default class LoginPage {
   }
 
   async afterRender() {
-    // Implementasi skip-link
+    // Implementasi skip-link dengan perbaikan
     const skipLink = document.querySelector('.skip-link');
     const loginForm = document.getElementById('loginForm');
     
     if (skipLink && loginForm) {
       skipLink.addEventListener('click', (event) => {
         event.preventDefault();
-        loginForm.focus();
+        // Pastikan element ada sebelum memanggil focus()
+        if (loginForm) {
+          loginForm.focus();
+        }
       });
     }
     

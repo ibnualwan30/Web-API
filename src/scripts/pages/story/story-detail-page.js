@@ -18,7 +18,7 @@ export default class StoryDetailPage {
           <span>&larr;</span> Kembali
         </a>
         
-        <main id="main-content">
+        <main id="main-content" tabindex="-1">
           <article id="story-detail" class="story-detail">
             <p>Loading story details...</p>
           </article>
@@ -32,12 +32,19 @@ export default class StoryDetailPage {
   }
 
   async afterRender() {
-    // Implementasi skip-link
+    // Implementasi skip-link - perbaikan untuk memastikan element ada sebelum fokus
     const skipLink = document.querySelector('.skip-link');
-    skipLink.addEventListener('click', (event) => {
-      event.preventDefault();
-      document.getElementById('main-content').focus();
-    });
+    const mainContent = document.getElementById('main-content');
+    
+    if (skipLink && mainContent) {
+      skipLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        // Pastikan element ada sebelum memanggil focus()
+        if (mainContent) {
+          mainContent.focus();
+        }
+      });
+    }
     
     // Ambil ID dari URL
     const url = parseActivePathname();
