@@ -11,13 +11,13 @@ export default class AddStoryPage {
   async render() {
     return `
       <div class="add-story-container container">
-        <a href="#main-content" class="skip-link">Skip to content</a>
+        <a href="#mainContent" class="skip-link">Skip to content</a>
         
         <a href="#/" class="back-button" aria-label="Kembali ke halaman utama">
           <span>&larr;</span> Kembali
         </a>
         
-        <main id="main-content">
+        <main id="mainContent" tabindex="-1">
           <h1 tabindex="0">Tambah Cerita Baru</h1>
           
           <form id="add-story-form" class="add-story-form">
@@ -65,10 +65,14 @@ export default class AddStoryPage {
   async afterRender() {
     // Implementasi skip-link
     const skipLink = document.querySelector('.skip-link');
-    skipLink.addEventListener('click', (event) => {
-      event.preventDefault();
-      document.getElementById('main-content').focus();
-    });
+    const mainContent = document.getElementById('mainContent');
+    
+    if (skipLink && mainContent) {
+      skipLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        mainContent.focus();
+      });
+    }
     
     // Inisialisasi View
     const view = new AddStoryView();

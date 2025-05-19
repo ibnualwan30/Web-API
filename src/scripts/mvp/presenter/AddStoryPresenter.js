@@ -1,12 +1,10 @@
-// src/scripts/mvp/presenter/AddStoryPresenter.js
-
 export default class AddStoryPresenter {
   constructor({ view, storyModel, authModel }) {
     this._view = view;
     this._storyModel = storyModel;
     this._authModel = authModel;
 
-    this._handlePageUnload = this._handlePageUnload.bind(this); // penting agar bisa remove listener
+    this._handlePageUnload = this._handlePageUnload.bind(this);
     this.init();
   }
 
@@ -16,11 +14,13 @@ export default class AddStoryPresenter {
       return;
     }
 
-    this._view.setSubmitHandler(this.submitStory.bind(this));
+    // Serahkan semua setup UI dan event handling ke view
+    this._view.initView(this);
     
-    // ✅ Tambahkan listener untuk stop kamera ketika keluar dari halaman
+    // Setup event untuk cleanup saat navigasi
     window.addEventListener('popstate', this._handlePageUnload);
     window.addEventListener('beforeunload', this._handlePageUnload);
+    window.addEventListener('hashchange', this._handlePageUnload);
   }
 
   async submitStory(formData) {
@@ -42,15 +42,12 @@ export default class AddStoryPresenter {
   }
 
   _handlePageUnload() {
-    // ✅ Fungsi untuk menghentikan kamera
-    const video = document.querySelector('video');
-    if (video && video.srcObject) {
-      video.srcObject.getTracks().forEach(track => track.stop());
-      video.srcObject = null;
-    }
+    // Beri tahu view untuk menghentikan kamera
+    this._view.stopCameraStream();
 
-    // Optional: bersihkan event listener agar tidak menumpuk jika halaman dimuat ulang
+    // Bersihkan event listener
     window.removeEventListener('popstate', this._handlePageUnload);
     window.removeEventListener('beforeunload', this._handlePageUnload);
+    window.removeEventListener('hashchange', this._handlePageUnload);
   }
 }

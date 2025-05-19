@@ -11,7 +11,7 @@ export default class HomePage {
   async render() {
     return `
       <div class="home-container container">
-        <a href="#main-content" class="skip-link">Skip to content</a>
+        <a href="#mainContent" class="skip-link">Skip to content</a>
         
         <header>
           <h1 tabindex="0">StoryApp</h1>
@@ -20,7 +20,7 @@ export default class HomePage {
           </div>
         </header>
         
-        <main id="main-content">
+        <main id="mainContent" tabindex="-1">
           <section class="story-list" id="story-list">
             <h2 tabindex="0">Cerita Terbaru</h2>
             <div id="stories-container" class="stories-container">
@@ -61,10 +61,14 @@ export default class HomePage {
   async afterRender() {
     // Implementasi skip-link
     const skipLink = document.querySelector('.skip-link');
-    skipLink.addEventListener('click', (event) => {
-      event.preventDefault();
-      document.getElementById('main-content').focus();
-    });
+    const mainContent = document.getElementById('mainContent');
+    
+    if (skipLink && mainContent) {
+      skipLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        mainContent.focus();
+      });
+    }
     
     // Inisialisasi View
     const view = new HomeView();

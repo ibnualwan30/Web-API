@@ -1,4 +1,4 @@
-
+// src/scripts/mvp/presenter/HomePresenter.js
 
 export default class HomePresenter {
     constructor({ view, storyModel, authModel }) {
@@ -16,11 +16,8 @@ export default class HomePresenter {
         return;
       }
       
-      // Setup event handler logout
-      this._view.setLogoutHandler(() => {
-        this._authModel.logout();
-        this._view.redirectToLogin();
-      });
+      // Inisialisasi view dengan presenter
+      this._view.initView(this);
       
       // Load stories
       await this.loadStories();
@@ -36,9 +33,13 @@ export default class HomePresenter {
         }
         
         this._view.showStories(stories);
-        this._view.initializeMap(stories);
       } catch (error) {
         this._view.showError(error.message);
       }
+    }
+
+    handleLogout() {
+      this._authModel.logout();
+      this._view.redirectToLogin();
     }
   }

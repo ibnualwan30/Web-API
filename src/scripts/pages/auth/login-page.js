@@ -12,9 +12,9 @@ export default class LoginPage {
       <div class="auth-container container">
         <h1 tabindex="0">Login</h1>
         
-        <a href="#" class="skip-link">Skip to content</a>
+        <a href="#loginForm" class="skip-link">Skip to content</a>
         
-        <form id="login-form" class="auth-form">
+        <form id="loginForm" class="auth-form" tabindex="-1">
           <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" name="email" required>
@@ -38,10 +38,14 @@ export default class LoginPage {
   async afterRender() {
     // Implementasi skip-link
     const skipLink = document.querySelector('.skip-link');
-    skipLink.addEventListener('click', (event) => {
-      event.preventDefault();
-      document.getElementById('login-form').focus();
-    });
+    const loginForm = document.getElementById('loginForm');
+    
+    if (skipLink && loginForm) {
+      skipLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        loginForm.focus();
+      });
+    }
     
     // Inisialisasi View
     const view = new LoginView();

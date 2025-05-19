@@ -1,19 +1,31 @@
+// src/scripts/mvp/view/home-view.js
+
 export default class HomeView {
   constructor() {
     this._storiesContainer = document.getElementById('stories-container');
     this._mapContainer = document.getElementById('map-container');
     this._map = null;
     this._markersLayer = null;
+    this._presenter = null;
   }
 
-  setLogoutHandler(handler) {
+  initView(presenter) {
+    this._presenter = presenter;
+    this.setLogoutHandler();
+  }
+
+  setLogoutHandler() {
     const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-      logoutButton.addEventListener('click', handler);
+    if (logoutButton && this._presenter) {
+      logoutButton.addEventListener('click', () => {
+        this._presenter.handleLogout();
+      });
     }
   }
 
   showStories(stories) {
+    if (!this._storiesContainer) return;
+    
     this._storiesContainer.innerHTML = '';
 
     stories.forEach((story) => {
@@ -28,16 +40,20 @@ export default class HomeView {
       });
     });
 
-    // ✅ Panggil peta setelah cerita ditampilkan
+    // Inisialisasi peta dengan data cerita
     this.initializeMap(stories);
   }
 
   showEmptyState() {
-    this._storiesContainer.innerHTML = '<p class="empty-state">Belum ada cerita yang tersedia.</p>';
+    if (this._storiesContainer) {
+      this._storiesContainer.innerHTML = '<p class="empty-state">Belum ada cerita yang tersedia.</p>';
+    }
   }
 
   showError(message) {
-    this._storiesContainer.innerHTML = `<p class="error-message">Error loading stories: ${message}</p>`;
+    if (this._storiesContainer) {
+      this._storiesContainer.innerHTML = `<p class="error-message">Error loading stories: ${message}</p>`;
+    }
   }
 
   initializeMap(stories) {
@@ -55,7 +71,7 @@ export default class HomeView {
     }
 
     try {
-      // ✅ Bersihkan peta lama jika ada
+      // Bersihkan peta lama jika ada
       if (this._map) {
         this._map.remove();
         this._map = null;
@@ -95,7 +111,9 @@ export default class HomeView {
       }
 
       setTimeout(() => {
-        this._map.invalidateSize();
+        if (this._map) {
+          this._map.invalidateSize();
+        }
       }, 100);
     } catch (error) {
       console.error('Error inisialisasi peta:', error);

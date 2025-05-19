@@ -18,24 +18,30 @@ export default class AddStoryView {
       this._map = null;
       this._markersLayer = null;
       this._selectedLocation = { lat: null, lng: null };
+      this._presenter = null;
+    }
+
+    // Metode untuk inisialisasi view
+    initView(presenter) {
+      this._presenter = presenter;
       
       // Inisialisasi tampilan
       this._setupCamera();
       this._setupMap();
       this._setupFormValidation();
+      this._setupSubmitHandler();
       
       // Menambahkan event handler untuk cleanup kamera ketika halaman ditinggalkan
       window.addEventListener('hashchange', () => {
         this.stopCameraStream();
       });
       
-      // Juga hentikan kamera jika halaman/tab ditutup
       window.addEventListener('beforeunload', () => {
         this.stopCameraStream();
       });
     }
   
-    setSubmitHandler(handler) {
+    _setupSubmitHandler() {
       this._form.addEventListener('submit', async (event) => {
         event.preventDefault();
         
@@ -59,7 +65,10 @@ export default class AddStoryView {
             formData.append('lon', this._selectedLocation.lng);
           }
           
-          await handler(formData);
+          // Serahkan data ke presenter untuk diproses
+          if (this._presenter) {
+            await this._presenter.submitStory(formData);
+          }
         } catch (error) {
           this.showError(error.message);
         }
@@ -85,12 +94,15 @@ export default class AddStoryView {
           this._resetPhoto();
         });
       } catch (error) {
-        document.querySelector('.camera-section').innerHTML = `
-          <div class="error-message">
-            <p>Tidak dapat mengakses kamera: ${error.message}</p>
-            <p>Silakan periksa izin kamera Anda.</p>
-          </div>
-        `;
+        const cameraSection = document.querySelector('.camera-section');
+        if (cameraSection) {
+          cameraSection.innerHTML = `
+            <div class="error-message">
+              <p>Tidak dapat mengakses kamera: ${error.message}</p>
+              <p>Silakan periksa izin kamera Anda.</p>
+            </div>
+          `;
+        }
       }
     }
   
@@ -122,7 +134,10 @@ export default class AddStoryView {
             this._selectedLocation = { lat, lng };
             
             // Tampilkan koordinat
-            document.getElementById('selected-coords').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            const selectedCoordsElement = document.getElementById('selected-coords');
+            if (selectedCoordsElement) {
+              selectedCoordsElement.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            }
             
             // Hapus marker sebelumnya
             this._markersLayer.clearLayers();
@@ -156,6 +171,7 @@ export default class AddStoryView {
     _validateForm() {
       const isValid = this._form.checkValidity();
       const submitButton = document.getElementById('submit-button');
+      if (!submitButton) return false;
       
       // Cek apakah sudah ada foto
       const hasPhoto = this._photoBlob !== null;
@@ -224,15 +240,21 @@ export default class AddStoryView {
     }
   
     showLoading() {
-      this._statusContainer.innerHTML = '<p class="loading">Mengirim cerita...</p>';
+      if (this._statusContainer) {
+        this._statusContainer.innerHTML = '<p class="loading">Mengirim cerita...</p>';
+      }
     }
   
     showSuccess(message) {
-      this._statusContainer.innerHTML = `<p class="success">${message}</p>`;
+      if (this._statusContainer) {
+        this._statusContainer.innerHTML = `<p class="success">${message}</p>`;
+      }
     }
   
     showError(message) {
-      this._statusContainer.innerHTML = `<p class="error">Error: ${message}</p>`;
+      if (this._statusContainer) {
+        this._statusContainer.innerHTML = `<p class="error">Error: ${message}</p>`;
+      }
     }
   
     redirectToHome() {
