@@ -1,6 +1,9 @@
+// src/scripts/pages/app.js
+
 import routes from '../routes/routes';
 import { getActiveRoute } from '../routes/url-parser';
 import ViewTransition from '../utils/view-transition';
+import AuthRepository from '../data/auth-repository';
 
 class App {
   #content = null;
@@ -46,8 +49,21 @@ class App {
       }
     }
     
+    // Jika page tidak ditemukan, gunakan halaman utama
     if (!page) {
       page = routes['/'];
+    }
+    
+    // Redirect ke halaman login jika belum terautentikasi dan bukan halaman auth
+    const isLoginPage = url === '/login';
+    const isRegisterPage = url === '/register';
+    const isAboutPage = url === '/about'; // Halaman About bisa diakses tanpa login
+    const isAuthPage = isLoginPage || isRegisterPage || isAboutPage;
+    
+    if (!AuthRepository.isAuthenticated() && !isAuthPage) {
+      console.log('Belum terautentikasi, redirect ke login');
+      page = routes['/login'];
+      window.location.hash = '#/login';
     }
     
     // Gunakan View Transition API jika tersedia

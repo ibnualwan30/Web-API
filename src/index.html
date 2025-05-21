@@ -1,3 +1,4 @@
+<!-- src/index.html (Diperbarui) -->
 <!DOCTYPE html>
 <html lang="id">
   <head>
@@ -23,6 +24,11 @@
             <li><a href="#/">Beranda</a></li>
             <li><a href="#/add-story">Tambah Cerita</a></li>
             <li><a href="#/about">Tentang</a></li>
+            <!-- Tambahkan link Login dan Register -->
+            <li class="auth-nav auth-not-logged"><a href="#/login">Login</a></li>
+            <li class="auth-nav auth-not-logged"><a href="#/register">Register</a></li>
+            <!-- Tambahkan Logout button yang hanya tampil jika login -->
+            <li class="auth-nav auth-logged"><button id="nav-logout-button" class="nav-logout-button">Logout</button></li>
           </ul>
         </nav>
 

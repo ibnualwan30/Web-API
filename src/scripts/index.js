@@ -1,8 +1,36 @@
+// src/scripts/index.js (Flow Login First)
+
 // CSS imports
 import '../styles/styles.css';
 
 import App from './pages/app';
 import AuthRepository from './data/auth-repository';
+
+// Fungsi untuk memperbarui tampilan navigasi auth
+const updateAuthNavigation = () => {
+  const isLoggedIn = AuthRepository.isAuthenticated();
+  const authNotLoggedElements = document.querySelectorAll('.auth-not-logged');
+  const authLoggedElements = document.querySelectorAll('.auth-logged');
+
+  // Tampilkan/sembunyikan elemen berdasarkan status login
+  authNotLoggedElements.forEach(element => {
+    element.style.display = isLoggedIn ? 'none' : 'block';
+  });
+
+  authLoggedElements.forEach(element => {
+    element.style.display = isLoggedIn ? 'block' : 'none';
+  });
+
+  // Setup event listener untuk tombol logout di navigasi
+  const navLogoutButton = document.getElementById('nav-logout-button');
+  if (navLogoutButton) {
+    navLogoutButton.addEventListener('click', () => {
+      AuthRepository.clearToken();
+      window.location.hash = '#/login';
+      updateAuthNavigation();
+    });
+  }
+};
 
 // Load Leaflet (via CDN)
 const loadLeafletScript = () => {
@@ -51,16 +79,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.warn('Failed to load Leaflet');
   }
   
+  // Update navigasi auth berdasarkan status login
+  updateAuthNavigation();
+  
   const app = new App({
     content: document.querySelector('#main-content'),
     drawerButton: document.querySelector('#drawer-button'),
     navigationDrawer: document.querySelector('#navigation-drawer'),
   });
   
+  // Redirect ke halaman login jika belum login dan belum di halaman login/register
+  if (!AuthRepository.isAuthenticated()) {
+    const currentHash = window.location.hash;
+    if (currentHash !== '#/login' && currentHash !== '#/register' && currentHash !== '#/about') {
+      window.location.hash = '#/login';
+    }
+  }
+  
   // Cek otentikasi dan render halaman
   await app.renderPage();
 
   window.addEventListener('hashchange', async () => {
+    // Update navigasi auth pada setiap perubahan halaman
+    updateAuthNavigation();
     await app.renderPage();
   });
 });

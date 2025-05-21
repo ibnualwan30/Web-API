@@ -53,8 +53,10 @@ export default class HomePage {
       `;
     }
     return `
-      <a href="#/login" class="login-button">Login</a>
-      <a href="#/register" class="register-button">Register</a>
+      <div class="auth-buttons">
+        <a href="#/login" class="login-button">Login</a>
+        <a href="#/register" class="register-button">Register</a>
+      </div>
     `;
   }
 
@@ -70,6 +72,15 @@ export default class HomePage {
         if (mainContent) {
           mainContent.focus();
         }
+      });
+    }
+    
+    // Setup event logout jika tombol logout ada
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', () => {
+        AuthRepository.clearToken();
+        window.location.hash = '#/login';
       });
     }
     

@@ -4,17 +4,18 @@ export default class AddStoryPresenter {
     this._storyModel = storyModel;
     this._authModel = authModel;
 
+    this._handlePageUnload = this._handlePageUnload.bind(this);
     this.init();
   }
 
   init() {
-    if (!this._authModel.isAuthenticated()) {
-      this._view.redirectToLogin();
-      return;
-    }
-
-    // Serahkan semua setup UI dan event handling ke view
+    // Inisialisasi view
     this._view.initView(this);
+    
+    // Setup event untuk cleanup saat navigasi
+    window.addEventListener('popstate', this._handlePageUnload);
+    window.addEventListener('beforeunload', this._handlePageUnload);
+    window.addEventListener('hashchange', this._handlePageUnload);
   }
 
   async submitStory(formData) {
@@ -35,8 +36,13 @@ export default class AddStoryPresenter {
     }
   }
 
-  // Metode untuk memberitahu view bahwa navigasi terjadi
-  onNavigate() {
+  _handlePageUnload() {
+    // Beri tahu view untuk menghentikan kamera
     this._view.stopCameraStream();
+
+    // Bersihkan event listener
+    window.removeEventListener('popstate', this._handlePageUnload);
+    window.removeEventListener('beforeunload', this._handlePageUnload);
+    window.removeEventListener('hashchange', this._handlePageUnload);
   }
 }

@@ -30,7 +30,7 @@ export default class HomeView {
 
   showLoading() {
     if (this._storiesContainer) {
-      this._storiesContainer.innerHTML = '<p class="loading">Loading stories...</p>';
+      this._storiesContainer.innerHTML = '<p class="loading-message">Loading stories...</p>';
     }
   }
 

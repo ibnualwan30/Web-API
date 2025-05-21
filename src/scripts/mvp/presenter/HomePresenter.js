@@ -10,17 +10,13 @@ export default class HomePresenter {
   }
 
   async init() {
-    // Periksa otentikasi
-    if (!this._authModel.isAuthenticated()) {
-      this._view.redirectToLogin();
-      return;
-    }
-    
     // Inisialisasi view dengan presenter
     this._view.initView(this);
     
-    // Load stories
-    await this.loadStories();
+    // Load stories hanya jika terautentikasi
+    if (this._authModel.isAuthenticated()) {
+      await this.loadStories();
+    }
   }
 
   async loadStories() {
