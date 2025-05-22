@@ -1,21 +1,20 @@
+// src/scripts/mvp/presenter/AddStoryPresenter.js
+
 export default class AddStoryPresenter {
   constructor({ view, storyModel, authModel }) {
     this._view = view;
     this._storyModel = storyModel;
     this._authModel = authModel;
 
-    this._handlePageUnload = this._handlePageUnload.bind(this);
     this.init();
   }
 
   init() {
-    // Inisialisasi view
+    // Inisialisasi view dengan presenter
     this._view.initView(this);
     
-    // Setup event untuk cleanup saat navigasi
-    window.addEventListener('popstate', this._handlePageUnload);
-    window.addEventListener('beforeunload', this._handlePageUnload);
-    window.addEventListener('hashchange', this._handlePageUnload);
+    // Setup event listeners untuk cleanup akan ditangani oleh view
+    // Tidak ada DOM manipulation di presenter
   }
 
   async submitStory(formData) {
@@ -36,13 +35,9 @@ export default class AddStoryPresenter {
     }
   }
 
-  _handlePageUnload() {
+  // Method ini akan dipanggil oleh view saat cleanup diperlukan
+  handleCleanup() {
     // Beri tahu view untuk menghentikan kamera
     this._view.stopCameraStream();
-
-    // Bersihkan event listener
-    window.removeEventListener('popstate', this._handlePageUnload);
-    window.removeEventListener('beforeunload', this._handlePageUnload);
-    window.removeEventListener('hashchange', this._handlePageUnload);
   }
 }

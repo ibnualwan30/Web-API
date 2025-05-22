@@ -863,3 +863,189 @@
   margin: 20px 0;
   text-align: center;
 }
+/* Tambahkan ke styles.css - Accessibility Enhancements */
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Help text styling */
+.help-text {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+/* Focus styles for better keyboard navigation */
+*:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* Skip to content link enhanced */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background-color: #1976d2;
+  color: white;
+  padding: 8px 15px;
+  z-index: 1000;
+  text-decoration: none;
+  transition: top 0.3s;
+  border-radius: 0 0 4px 0;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Story item keyboard navigation */
+.story-item:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Button focus states */
+button:focus,
+.btn:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* Form fieldset styling */
+fieldset {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+fieldset legend {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
+  padding: 0 10px;
+}
+
+/* Error and success states for form validation */
+.form-group input:invalid,
+.form-group textarea:invalid {
+  border-color: #f44336;
+}
+
+.form-group input:valid,
+.form-group textarea:valid {
+  border-color: #4caf50;
+}
+
+/* Enhanced button states */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button:disabled:focus {
+  outline-color: #999;
+}
+
+/* Loading and status messages */
+[role="status"],
+[role="alert"] {
+  padding: 15px;
+  border-radius: 4px;
+  margin: 15px 0;
+}
+
+[role="status"] {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border-left: 4px solid #2196f3;
+}
+
+[role="alert"] {
+  background-color: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #f44336;
+}
+
+/* Map accessibility */
+.leaflet-container:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* Photo preview accessibility */
+.photo-preview {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .story-item {
+    border: 2px solid #000;
+  }
+  
+  button {
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .story-item:hover {
+    transform: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #ffffff;
+  }
+  
+  .story-item {
+    background-color: #1e1e1e;
+    color: #ffffff;
+  }
+  
+  .auth-container {
+    background-color: #1e1e1e;
+    color: #ffffff;
+  }
+  
+  input, textarea {
+    background-color: #2d2d2d;
+    color: #ffffff;
+    border-color: #555;
+  }
+  
+  input:focus, textarea:focus {
+    border-color: #2196f3;
+  }
+}

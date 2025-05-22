@@ -17,7 +17,7 @@ export default class StoryDetailView {
   
   showLoading() {
     if (this._articleContainer) {
-      this._articleContainer.innerHTML = '<p class="loading">Loading story details...</p>';
+      this._articleContainer.innerHTML = '<p class="loading" role="status" aria-live="polite">Loading story details...</p>';
     }
   }
 
@@ -28,13 +28,14 @@ export default class StoryDetailView {
 
   showError(message) {
     if (this._articleContainer) {
-      this._articleContainer.innerHTML = `<p class="error-message">${message}</p>`;
+      this._articleContainer.innerHTML = `<p class="error-message" role="alert" aria-live="assertive">${message}</p>`;
     }
   }
 
   hideMap() {
     if (this._mapContainer) {
       this._mapContainer.style.display = 'none';
+      this._mapContainer.setAttribute('aria-hidden', 'true');
     }
   }
 
@@ -44,12 +45,15 @@ export default class StoryDetailView {
     
     // Make sure the map container is visible
     this._mapContainer.style.display = 'block';
+    this._mapContainer.removeAttribute('aria-hidden');
     
     // Tambahkan div untuk peta jika belum ada
     if (!document.getElementById('story-map')) {
       const mapDiv = document.createElement('div');
       mapDiv.id = 'story-map';
       mapDiv.className = 'story-map';
+      mapDiv.setAttribute('role', 'img');
+      mapDiv.setAttribute('aria-label', `Peta lokasi cerita ${story.name}`);
       this._mapContainer.appendChild(mapDiv);
     }
     
@@ -67,7 +71,10 @@ export default class StoryDetailView {
     
     try {
       // Buat instance peta
-      this._map = L.map(mapElement).setView([story.lat, story.lon], 13);
+      this._map = L.map(mapElement, {
+        attributionControl: true,
+        zoomControl: true
+      }).setView([story.lat, story.lon], 13);
       
       // Tambahkan tile layer OpenStreetMap
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -76,7 +83,9 @@ export default class StoryDetailView {
       }).addTo(this._map);
       
       // Tambahkan marker
-      L.marker([story.lat, story.lon])
+      L.marker([story.lat, story.lon], {
+        alt: `Lokasi cerita ${story.name}`
+      })
         .bindPopup(`
           <div class="popup-content">
             <h4>${story.name}</h4>
@@ -100,14 +109,29 @@ export default class StoryDetailView {
 
   _createStoryDetailTemplate(story) {
     return `
-      <h1 class="story-title" tabindex="0">${story.name}</h1>
-      <img src="${story.photoUrl}" alt="Gambar cerita dari ${story.name}" class="story-image">
+      <header>
+        <h1 class="story-title" tabindex="0">${story.name}</h1>
+      </header>
+      
+      <div class="story-media">
+        <img 
+          src="${story.photoUrl}" 
+          alt="Foto cerita dari ${story.name}" 
+          class="story-image"
+          loading="lazy"
+        >
+      </div>
+      
       <div class="story-meta">
-        <p class="story-date">${this._formatDate(story.createdAt)}</p>
+        <time class="story-date" datetime="${story.createdAt}">
+          Dipublikasikan pada ${this._formatDate(story.createdAt)}
+        </time>
       </div>
-      <div class="story-body">
+      
+      <section class="story-body">
+        <h2 class="sr-only">Isi Cerita</h2>
         <p class="story-description">${story.description}</p>
-      </div>
+      </section>
     `;
   }
 

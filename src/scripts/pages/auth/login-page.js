@@ -10,9 +10,9 @@ export default class LoginPage {
   async render() {
     return `
       <div class="auth-container container">
-        <h1 tabindex="0">Login</h1>
-        
         <a href="#loginForm" class="skip-link">Skip to content</a>
+        
+        <h1 tabindex="0">Login</h1>
         
         <form id="loginForm" class="auth-form" tabindex="-1">
           <div class="form-group">

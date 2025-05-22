@@ -16,10 +16,12 @@ export default class HomeView {
     this._storiesContainer = document.getElementById('stories-container');
     this._mapContainer = document.getElementById('map-container');
     
-    this.setLogoutHandler();
+    // Setup event listeners - DOM manipulation dilakukan di view
+    this._setupEventListeners();
   }
 
-  setLogoutHandler() {
+  _setupEventListeners() {
+    // Setup logout button handler
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton && this._presenter) {
       logoutButton.addEventListener('click', () => {
@@ -30,7 +32,7 @@ export default class HomeView {
 
   showLoading() {
     if (this._storiesContainer) {
-      this._storiesContainer.innerHTML = '<p class="loading-message">Loading stories...</p>';
+      this._storiesContainer.innerHTML = '<p class="loading-message" role="status" aria-live="polite">Loading stories...</p>';
     }
   }
 
@@ -49,6 +51,15 @@ export default class HomeView {
         const storyId = item.dataset.id;
         this.navigate(`#/detail/${storyId}`);
       });
+      
+      // Tambahkan keyboard support
+      item.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          const storyId = item.dataset.id;
+          this.navigate(`#/detail/${storyId}`);
+        }
+      });
     });
 
     // Inisialisasi peta dengan data cerita
@@ -57,13 +68,13 @@ export default class HomeView {
 
   showEmptyState() {
     if (this._storiesContainer) {
-      this._storiesContainer.innerHTML = '<p class="empty-state">Belum ada cerita yang tersedia.</p>';
+      this._storiesContainer.innerHTML = '<p class="empty-state" role="status">Belum ada cerita yang tersedia.</p>';
     }
   }
 
   showError(message) {
     if (this._storiesContainer) {
-      this._storiesContainer.innerHTML = `<p class="error-message">Error loading stories: ${message}</p>`;
+      this._storiesContainer.innerHTML = `<p class="error-message" role="alert" aria-live="assertive">Error loading stories: ${message}</p>`;
     }
   }
 
@@ -89,7 +100,11 @@ export default class HomeView {
       }
 
       // Buat instance baru
-      this._map = L.map(mapElement).setView([-2.5, 118], 5); // Center di Indonesia
+      this._map = L.map(mapElement, {
+        // Tambahkan accessibility attributes
+        attributionControl: true,
+        zoomControl: true
+      }).setView([-2.5, 118], 5); // Center di Indonesia
 
       // Tambahkan layer OpenStreetMap
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -103,12 +118,15 @@ export default class HomeView {
 
       stories.forEach(story => {
         if (story.lat && story.lon) {
-          const marker = L.marker([story.lat, story.lon])
+          const marker = L.marker([story.lat, story.lon], {
+            // Tambahkan alt text untuk marker
+            alt: `Lokasi cerita dari ${story.name}`
+          })
             .bindPopup(`
               <div class="popup-content">
                 <h4>${story.name}</h4>
                 <p>${story.description ? story.description.substring(0, 100) : ''}${story.description?.length > 100 ? '...' : ''}</p>
-                <a href="#/detail/${story.id}">Lihat detail</a>
+                <a href="#/detail/${story.id}" aria-label="Lihat detail cerita ${story.name}">Lihat detail</a>
               </div>
             `)
             .addTo(this._markersLayer);
@@ -120,6 +138,15 @@ export default class HomeView {
       if (bounds.length > 0) {
         this._map.fitBounds(bounds);
       }
+
+      // Tambahkan ARIA label untuk peta
+      setTimeout(() => {
+        const mapContainer = document.querySelector('.stories-map');
+        if (mapContainer) {
+          mapContainer.setAttribute('role', 'img');
+          mapContainer.setAttribute('aria-label', 'Peta interaktif menampilkan lokasi cerita-cerita');
+        }
+      }, 200);
 
       setTimeout(() => {
         if (this._map) {
@@ -133,12 +160,12 @@ export default class HomeView {
 
   _createStoryItemTemplate(story) {
     return `
-      <article class="story-item" data-id="${story.id}">
-        <img src="${story.photoUrl}" alt="Gambar cerita dari ${story.name}" class="story-image">
+      <article class="story-item" data-id="${story.id}" tabindex="0" role="button" aria-label="Baca cerita dari ${story.name}">
+        <img src="${story.photoUrl}" alt="Foto cerita dari ${story.name}" class="story-image" loading="lazy">
         <div class="story-content">
           <h3 class="story-name">${story.name}</h3>
           <p class="story-description">${story.description ? story.description.substring(0, 150) : ''}${story.description?.length > 150 ? '...' : ''}</p>
-          <p class="story-date">${this._formatDate(story.createdAt)}</p>
+          <time class="story-date" datetime="${story.createdAt}">${this._formatDate(story.createdAt)}</time>
         </div>
       </article>
     `;

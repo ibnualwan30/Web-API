@@ -19,6 +19,11 @@ export default class AddStoryView {
     this._markersLayer = null;
     this._selectedLocation = { lat: null, lng: null };
     this._presenter = null;
+
+    // Bind methods untuk event listeners
+    this._handlePageUnload = this._handlePageUnload.bind(this);
+    this._handleHashChange = this._handleHashChange.bind(this);
+    this._handleBeforeUnload = this._handleBeforeUnload.bind(this);
   }
 
   // Metode untuk inisialisasi view
@@ -42,15 +47,42 @@ export default class AddStoryView {
     this._setupMap();
     this._setupFormValidation();
     this._setupSubmitHandler();
-    
-    // Menambahkan event handler untuk cleanup kamera ketika halaman ditinggalkan
-    window.addEventListener('hashchange', () => {
-      this.stopCameraStream();
-    });
-    
-    window.addEventListener('beforeunload', () => {
-      this.stopCameraStream();
-    });
+    this._setupEventListeners();
+  }
+
+  _setupEventListeners() {
+    // Setup event untuk cleanup saat navigasi - DOM manipulation di view
+    window.addEventListener('popstate', this._handlePageUnload);
+    window.addEventListener('beforeunload', this._handleBeforeUnload);
+    window.addEventListener('hashchange', this._handleHashChange);
+  }
+
+  _handlePageUnload() {
+    this._cleanup();
+  }
+
+  _handleHashChange() {
+    this._cleanup();
+  }
+
+  _handleBeforeUnload() {
+    this._cleanup();
+  }
+
+  _cleanup() {
+    // Panggil presenter untuk handle cleanup logic
+    if (this._presenter && this._presenter.handleCleanup) {
+      this._presenter.handleCleanup();
+    }
+
+    // Cleanup event listeners
+    this._removeEventListeners();
+  }
+
+  _removeEventListeners() {
+    window.removeEventListener('popstate', this._handlePageUnload);
+    window.removeEventListener('beforeunload', this._handleBeforeUnload);
+    window.removeEventListener('hashchange', this._handleHashChange);
   }
   
   _setupSubmitHandler() {
@@ -302,8 +334,8 @@ export default class AddStoryView {
   }
   
   redirectToHome() {
-    // Hentikan stream kamera sebelum berpindah halaman
-    this.stopCameraStream();
+    // Cleanup sebelum berpindah halaman
+    this._cleanup();
     
     // Gunakan View Transition API jika tersedia
     if (document.startViewTransition) {
@@ -316,8 +348,8 @@ export default class AddStoryView {
   }
   
   redirectToLogin() {
-    // Hentikan stream kamera sebelum berpindah halaman
-    this.stopCameraStream();
+    // Cleanup sebelum berpindah halaman
+    this._cleanup();
     
     // Gunakan View Transition API jika tersedia
     if (document.startViewTransition) {

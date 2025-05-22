@@ -75,15 +75,6 @@ export default class HomePage {
       });
     }
     
-    // Setup event logout jika tombol logout ada
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-      logoutButton.addEventListener('click', () => {
-        AuthRepository.clearToken();
-        window.location.hash = '#/login';
-      });
-    }
-    
     // Inisialisasi View
     const view = new HomeView();
     

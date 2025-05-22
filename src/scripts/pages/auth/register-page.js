@@ -10,9 +10,9 @@ export default class RegisterPage {
   async render() {
     return `
       <div class="auth-container container">
-        <h1 tabindex="0">Register</h1>
-        
         <a href="#register-form" class="skip-link">Skip to content</a>
+        
+        <h1 tabindex="0">Register</h1>
         
         <form id="register-form" class="auth-form" tabindex="-1">
           <div class="form-group">
