@@ -1,4 +1,4 @@
-// src/scripts/pages/home/home-page.js
+// src/scripts/pages/home/home-page.js - Complete with Navigation
 
 import StoryAPI from '../../data/story-api';
 import AuthRepository from '../../data/auth-repository';
@@ -10,70 +10,42 @@ import AuthModel from '../../mvp/model/AuthModel';
 export default class HomePage {
   async render() {
     return `
-      <div class="home-container container">
-        <a href="#mainContent" class="skip-link">Skip to content</a>
-        
-        <header>
-          <h1 tabindex="0">StoryApp</h1>
-          <div class="header-actions">
-            ${this._getHeaderActionButtons()}
-          </div>
-        </header>
-        
-        <main id="mainContent" tabindex="-1">
-          <section class="story-list" id="story-list">
-            <h2 tabindex="0">Cerita Terbaru</h2>
-            <div id="stories-container" class="stories-container">
-              <p>Loading stories...</p>
-            </div>
-          </section>
-          
-          <!-- Penambahan Container untuk Peta -->
-          <section class="map-section">
-            <h2 tabindex="0">Peta Cerita</h2>
-            <div id="map-container" class="map-container">
-              <div id="map" class="stories-map"></div>
-            </div>
-          </section>
-        </main>
-        
-        <div class="floating-action-button">
-          <a href="#/add-story" aria-label="Tambah cerita baru">
-            <span>+</span>
-          </a>
+      <section class="hero-section">
+        <div class="container">
+          <h1 tabindex="0">Selamat Datang di StoryApp</h1>
+          <p>Bagikan cerita dan lokasi terbaik Anda dengan dunia</p>
         </div>
-      </div>
-    `;
-  }
-
-  _getHeaderActionButtons() {
-    if (AuthRepository.isAuthenticated()) {
-      return `
-        <button id="logout-button" class="logout-button">Logout</button>
-      `;
-    }
-    return `
-      <div class="auth-buttons">
-        <a href="#/login" class="login-button">Login</a>
-        <a href="#/register" class="register-button">Register</a>
+      </section>
+      
+      <section class="story-list">
+        <div class="container">
+          <h2 tabindex="0">Cerita Terbaru</h2>
+          <div id="stories-container" class="stories-container">
+            <p class="loading-message">Loading stories...</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Container untuk Peta -->
+      <section class="map-section">
+        <div class="container">
+          <h2 tabindex="0">Peta Cerita</h2>
+          <div id="map-container" class="map-container">
+            <div id="map" class="stories-map"></div>
+          </div>
+        </div>
+      </section>
+      
+      <div class="floating-action-button">
+        <a href="#/add-story" aria-label="Tambah cerita baru">
+          <span>+</span>
+        </a>
       </div>
     `;
   }
 
   async afterRender() {
-    // Implementasi skip-link - perbaikan untuk memastikan element ada sebelum fokus
-    const skipLink = document.querySelector('.skip-link');
-    const mainContent = document.getElementById('mainContent');
-    
-    if (skipLink && mainContent) {
-      skipLink.addEventListener('click', (event) => {
-        event.preventDefault();
-        // Pastikan element ada sebelum memanggil focus()
-        if (mainContent) {
-          mainContent.focus();
-        }
-      });
-    }
+    // NO skip-link implementation - menggunakan global skip link dari index.html
     
     // Inisialisasi View
     const view = new HomeView();

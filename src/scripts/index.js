@@ -1,4 +1,4 @@
-// src/scripts/index.js (Flow Login First)
+// src/scripts/index.js (Fixed Clean Navigation)
 
 // CSS imports
 import '../styles/styles.css';
@@ -12,6 +12,13 @@ const updateAuthNavigation = () => {
   const authNotLoggedElements = document.querySelectorAll('.auth-not-logged');
   const authLoggedElements = document.querySelectorAll('.auth-logged');
 
+  // Update body class untuk styling
+  if (isLoggedIn) {
+    document.body.classList.add('logged-in');
+  } else {
+    document.body.classList.remove('logged-in');
+  }
+
   // Tampilkan/sembunyikan elemen berdasarkan status login
   authNotLoggedElements.forEach(element => {
     element.style.display = isLoggedIn ? 'none' : 'block';
@@ -24,10 +31,20 @@ const updateAuthNavigation = () => {
   // Setup event listener untuk tombol logout di navigasi
   const navLogoutButton = document.getElementById('nav-logout-button');
   if (navLogoutButton) {
-    navLogoutButton.addEventListener('click', () => {
+    // Remove existing listeners to prevent duplicates
+    const newButton = navLogoutButton.cloneNode(true);
+    navLogoutButton.parentNode.replaceChild(newButton, navLogoutButton);
+    
+    newButton.addEventListener('click', () => {
       AuthRepository.clearToken();
       window.location.hash = '#/login';
       updateAuthNavigation();
+      
+      // Close mobile menu if open
+      const navigationDrawer = document.getElementById('navigation-drawer');
+      if (navigationDrawer) {
+        navigationDrawer.classList.remove('open');
+      }
     });
   }
 };
@@ -56,19 +73,55 @@ const loadLeafletScript = () => {
     
     leafletScript.onload = () => {
       console.log('Leaflet loaded successfully');
-      setTimeout(resolve, 100); // Berikan waktu untuk menginisialisasi
+      setTimeout(resolve, 100);
     };
     
     leafletScript.onerror = (error) => {
       console.error('Error loading Leaflet:', error);
-      resolve(); // Resolve anyway to avoid hanging
+      resolve();
     };
     
     document.head.appendChild(leafletScript);
   });
 };
 
+// Setup drawer functionality
+const setupDrawer = () => {
+  const drawerButton = document.querySelector('#drawer-button');
+  const navigationDrawer = document.querySelector('#navigation-drawer');
+  
+  if (!drawerButton || !navigationDrawer) return;
+  
+  drawerButton.addEventListener('click', () => {
+    navigationDrawer.classList.toggle('open');
+  });
+
+  // Close drawer when clicking outside
+  document.addEventListener('click', (event) => {
+    if (!navigationDrawer.contains(event.target) && !drawerButton.contains(event.target)) {
+      navigationDrawer.classList.remove('open');
+    }
+  });
+
+  // Close drawer when clicking on navigation links
+  navigationDrawer.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      navigationDrawer.classList.remove('open');
+    });
+  });
+
+  // Close drawer on escape key
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && navigationDrawer.classList.contains('open')) {
+      navigationDrawer.classList.remove('open');
+      drawerButton.focus();
+    }
+  });
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('DOM Content Loaded');
+  
   // Load dependencies
   await loadLeafletScript();
   
@@ -79,19 +132,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.warn('Failed to load Leaflet');
   }
   
+  // Debug: Check if elements exist
+  const content = document.querySelector('#main-content');
+  const drawerButton = document.querySelector('#drawer-button');
+  const navigationDrawer = document.querySelector('#navigation-drawer');
+  
+  console.log('Elements found:', {
+    content: !!content,
+    drawerButton: !!drawerButton,
+    navigationDrawer: !!navigationDrawer
+  });
+  
+  // Setup drawer functionality
+  setupDrawer();
+  
   // Update navigasi auth berdasarkan status login
   updateAuthNavigation();
   
   const app = new App({
-    content: document.querySelector('#main-content'),
-    drawerButton: document.querySelector('#drawer-button'),
-    navigationDrawer: document.querySelector('#navigation-drawer'),
+    content: content,
+    drawerButton: drawerButton,
+    navigationDrawer: navigationDrawer,
   });
+  
+  console.log('App initialized');
   
   // Redirect ke halaman login jika belum login dan belum di halaman login/register
   if (!AuthRepository.isAuthenticated()) {
     const currentHash = window.location.hash;
+    console.log('Not authenticated, current hash:', currentHash);
     if (currentHash !== '#/login' && currentHash !== '#/register' && currentHash !== '#/about') {
+      console.log('Redirecting to login');
       window.location.hash = '#/login';
     }
   }
@@ -100,6 +171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await app.renderPage();
 
   window.addEventListener('hashchange', async () => {
+    console.log('Hash changed to:', window.location.hash);
     // Update navigasi auth pada setiap perubahan halaman
     updateAuthNavigation();
     await app.renderPage();
