@@ -1,10 +1,17 @@
-// src/scripts/index.js (Fixed Clean Navigation)
+// src/scripts/index.js - PWA Enhanced
 
 // CSS imports
 import '../styles/styles.css';
 
 import App from './pages/app';
 import AuthRepository from './data/auth-repository';
+import indexedDBHelper from './data/indexeddb-helper';
+import pushNotificationHelper from './utils/push-notification';
+
+// PWA Variables
+let deferredPrompt;
+let installBanner;
+let notificationBanner;
 
 // Fungsi untuk memperbarui tampilan navigasi auth
 const updateAuthNavigation = () => {
@@ -85,6 +92,238 @@ const loadLeafletScript = () => {
   });
 };
 
+// Register Service Worker
+const registerServiceWorker = async () => {
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('Service Worker registered successfully:', registration);
+      
+      // Listen for updates
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // New version available
+            showUpdateAvailable();
+          }
+        });
+      });
+      
+      return registration;
+    } catch (error) {
+      console.error('Service Worker registration failed:', error);
+      return null;
+    }
+  } else {
+    console.warn('Service Worker not supported');
+    return null;
+  }
+};
+
+// Show update available notification
+const showUpdateAvailable = () => {
+  const updateBanner = document.createElement('div');
+  updateBanner.className = 'update-banner';
+  updateBanner.innerHTML = `
+    <div class="update-banner-content">
+      <p>Pembaruan aplikasi tersedia!</p>
+      <button id="refresh-app">Perbarui Sekarang</button>
+      <button id="dismiss-update">Nanti</button>
+    </div>
+  `;
+  
+  document.body.appendChild(updateBanner);
+  
+  document.getElementById('refresh-app').addEventListener('click', () => {
+    window.location.reload();
+  });
+  
+  document.getElementById('dismiss-update').addEventListener('click', () => {
+    updateBanner.remove();
+  });
+};
+
+// Setup PWA Install Banner
+const setupInstallBanner = () => {
+  installBanner = document.getElementById('install-banner');
+  
+  if (!installBanner) {
+    console.warn('Install banner element not found');
+    return;
+  }
+  
+  // Listen for beforeinstallprompt event
+  window.addEventListener('beforeinstallprompt', (event) => {
+    console.log('PWA: beforeinstallprompt fired');
+    
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    event.preventDefault();
+    
+    // Store the event so it can be triggered later
+    deferredPrompt = event;
+    
+    // Show install banner
+    installBanner.style.display = 'block';
+  });
+  
+  // Install button click handler
+  const installButton = document.getElementById('install-button');
+  if (installButton) {
+    installButton.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        // Show the install prompt
+        deferredPrompt.prompt();
+        
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('PWA install outcome:', outcome);
+        
+        // Clear the deferredPrompt
+        deferredPrompt = null;
+        
+        // Hide the install banner
+        installBanner.style.display = 'none';
+      }
+    });
+  }
+  
+  // Dismiss install banner
+  const dismissInstall = document.getElementById('dismiss-install');
+  if (dismissInstall) {
+    dismissInstall.addEventListener('click', () => {
+      installBanner.style.display = 'none';
+      
+      // Don't show again for this session
+      sessionStorage.setItem('installBannerDismissed', 'true');
+    });
+  }
+  
+  // Listen for app installed event
+  window.addEventListener('appinstalled', (event) => {
+    console.log('PWA: App installed successfully');
+    installBanner.style.display = 'none';
+    
+    // Show success notification
+    showInstallSuccessNotification();
+  });
+  
+  // Check if already dismissed this session
+  if (sessionStorage.getItem('installBannerDismissed')) {
+    installBanner.style.display = 'none';
+  }
+};
+
+// Setup Push Notification Banner
+const setupNotificationBanner = () => {
+  notificationBanner = document.getElementById('notification-banner');
+  
+  if (!notificationBanner) {
+    console.warn('Notification banner element not found');
+    return;
+  }
+  
+  // Check if notifications are supported and not already granted
+  if (pushNotificationHelper.isNotificationSupported()) {
+    const permission = pushNotificationHelper.getPermissionStatus();
+    
+    if (permission === 'default' && !localStorage.getItem('notificationBannerDismissed')) {
+      // Show notification banner after a delay
+      setTimeout(() => {
+        notificationBanner.style.display = 'block';
+      }, 5000);
+    }
+  }
+  
+  // Enable notifications button
+  const enableButton = document.getElementById('enable-notifications');
+  if (enableButton) {
+    enableButton.addEventListener('click', async () => {
+      try {
+        const granted = await pushNotificationHelper.requestPermission();
+        
+        if (granted) {
+          await pushNotificationHelper.subscribetoPush();
+          notificationBanner.style.display = 'none';
+          
+          // Show success notification
+          pushNotificationHelper.showLocalNotification(
+            'Notifikasi Diaktifkan!',
+            {
+              body: 'Anda akan menerima pemberitahuan tentang cerita terbaru.',
+              tag: 'notification-enabled'
+            }
+          );
+        } else {
+          alert('Izin notifikasi diperlukan untuk fitur ini.');
+        }
+      } catch (error) {
+        console.error('Error enabling notifications:', error);
+        alert('Gagal mengaktifkan notifikasi.');
+      }
+    });
+  }
+  
+  // Dismiss notifications button
+  const dismissButton = document.getElementById('dismiss-notifications');
+  if (dismissButton) {
+    dismissButton.addEventListener('click', () => {
+      notificationBanner.style.display = 'none';
+      localStorage.setItem('notificationBannerDismissed', 'true');
+    });
+  }
+};
+
+// Show install success notification
+const showInstallSuccessNotification = () => {
+  const notification = document.createElement('div');
+  notification.className = 'install-success-notification';
+  notification.innerHTML = `
+    <div class="notification-content">
+      <h4>✅ Aplikasi Berhasil Diinstall!</h4>
+      <p>StoryApp sekarang dapat diakses dari homescreen Anda.</p>
+    </div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+  }, 5000);
+};
+
+// Initialize PWA features
+const initializePWA = async () => {
+  console.log('Initializing PWA features...');
+  
+  // Register Service Worker
+  await registerServiceWorker();
+  
+  // Initialize IndexedDB
+  try {
+    await indexedDBHelper.init();
+    console.log('IndexedDB initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize IndexedDB:', error);
+  }
+  
+  // Initialize Push Notifications
+  try {
+    await pushNotificationHelper.initialize();
+    console.log('Push notifications initialized');
+  } catch (error) {
+    console.error('Failed to initialize push notifications:', error);
+  }
+  
+  // Setup install banner
+  setupInstallBanner();
+  
+  // Setup notification banner
+  setupNotificationBanner();
+  
+  console.log('PWA features initialized');
+};
+
 // Setup drawer functionality
 const setupDrawer = () => {
   const drawerButton = document.querySelector('#drawer-button');
@@ -119,8 +358,46 @@ const setupDrawer = () => {
   });
 };
 
+// Check network status
+const setupNetworkStatusHandler = () => {
+  const showNetworkStatus = (isOnline) => {
+    const existingBanner = document.querySelector('.network-status-banner');
+    if (existingBanner) {
+      existingBanner.remove();
+    }
+    
+    if (!isOnline) {
+      const offlineBanner = document.createElement('div');
+      offlineBanner.className = 'network-status-banner offline';
+      offlineBanner.innerHTML = `
+        <div class="network-status-content">
+          <span>📡 Mode Offline - Data mungkin tidak terbaru</span>
+        </div>
+      `;
+      document.body.appendChild(offlineBanner);
+    }
+  };
+  
+  // Initial check
+  showNetworkStatus(navigator.onLine);
+  
+  // Listen for network changes
+  window.addEventListener('online', () => {
+    console.log('Network: Back online');
+    showNetworkStatus(true);
+  });
+  
+  window.addEventListener('offline', () => {
+    console.log('Network: Gone offline');
+    showNetworkStatus(false);
+  });
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('DOM Content Loaded');
+  
+  // Initialize PWA features first
+  await initializePWA();
   
   // Load dependencies
   await loadLeafletScript();
@@ -146,6 +423,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Setup drawer functionality
   setupDrawer();
   
+  // Setup network status handler
+  setupNetworkStatusHandler();
+  
   // Update navigasi auth berdasarkan status login
   updateAuthNavigation();
   
@@ -161,7 +441,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!AuthRepository.isAuthenticated()) {
     const currentHash = window.location.hash;
     console.log('Not authenticated, current hash:', currentHash);
-    if (currentHash !== '#/login' && currentHash !== '#/register' && currentHash !== '#/about') {
+    if (currentHash !== '#/login' && currentHash !== '#/register' && currentHash !== '#/about' && currentHash !== '#/favorites') {
       console.log('Redirecting to login');
       window.location.hash = '#/login';
     }

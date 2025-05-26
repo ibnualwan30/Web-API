@@ -1,19 +1,54 @@
-<!-- src/index.html (Fixed Consistent Skip Link) -->
 <!DOCTYPE html>
 <html lang="id">
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Story Map - Cerita dan lokasimu dalam satu aplikasi">
+    <meta name="description" content="Story Map - Cerita dan lokasimu dalam satu aplikasi PWA">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2196f3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="StoryApp">
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+    <meta name="msapplication-TileColor" content="#2196f3">
+    
+    <!-- Favicon -->
     <link rel="shortcut icon" href="favicon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
     
-    <title>Story Map</title>
+    <title>Story Map - PWA</title>
   </head>
   <body>
     <!-- Skip to content link for accessibility - CONSISTENT -->
     <a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+    
+    <!-- Install PWA Banner (akan ditampilkan jika memenuhi syarat) -->
+    <div id="install-banner" class="install-banner" style="display: none;">
+      <div class="install-banner-content">
+        <div class="install-banner-text">
+          <h3>Install StoryApp</h3>
+          <p>Install aplikasi untuk pengalaman yang lebih baik!</p>
+        </div>
+        <div class="install-banner-actions">
+          <button id="install-button" class="install-btn">Install</button>
+          <button id="dismiss-install" class="dismiss-btn">Nanti</button>
+        </div>
+      </div>
+    </div>
     
     <header>
       <div class="main-header">
@@ -23,6 +58,7 @@
           <ul id="nav-list" class="nav-list">
             <li><a href="#/">Beranda</a></li>
             <li><a href="#/add-story">Tambah Cerita</a></li>
+            <li><a href="#/favorites">Favorit</a></li>
             <li><a href="#/about">Tentang</a></li>
             <!-- Tambahkan link Login dan Register -->
             <li class="auth-nav auth-not-logged"><a href="#/login">Login</a></li>
@@ -38,9 +74,23 @@
 
     <main id="main-content" class="main-content" tabindex="-1"></main>
     
+    <!-- Notification Permission Banner -->
+    <div id="notification-banner" class="notification-banner" style="display: none;">
+      <div class="notification-banner-content">
+        <div class="notification-banner-text">
+          <h4>Aktifkan Notifikasi</h4>
+          <p>Dapatkan pemberitahuan tentang cerita terbaru!</p>
+        </div>
+        <div class="notification-banner-actions">
+          <button id="enable-notifications" class="notification-btn">Aktifkan</button>
+          <button id="dismiss-notifications" class="dismiss-btn">Tidak</button>
+        </div>
+      </div>
+    </div>
+    
     <footer>
       <div class="container">
-        <p>&copy; 2025 Story Map - Didukung oleh <a href="https://story-api.dicoding.dev/v1" target="_blank" rel="noopener">Story API</a></p>
+        <p>&copy; 2025 Story Map PWA - Didukung oleh <a href="https://story-api.dicoding.dev/v1" target="_blank" rel="noopener">Story API</a></p>
       </div>
     </footer>
   </body>
