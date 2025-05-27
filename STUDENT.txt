@@ -1,2 +1,34 @@
 APP_URL=<url_aplikasi>
 MAP_SERVICE_API_KEY=<api_key>
+
+Nama: [Isi Nama Lengkap Anda]
+Email: [Isi Email Anda]
+URL Deployment: https://moonlit-alfajores-e94fe6.netlify.app
+
+Submission 2 - PWA StoryApp
+
+Fitur yang sudah diimplementasi:
+✅ Mempertahankan kriteria submission sebelumnya (SPA, API, tambah data, aksesibilitas, transisi)
+✅ Push Notification dengan VAPID keys dan service worker implementation
+✅ PWA (Installable & Offline capable) dengan manifest.json dan service worker caching
+✅ IndexedDB untuk menyimpan, menampilkan, dan menghapus data (fitur favorites)
+✅ Aplikasi dapat diakses secara offline dengan service worker caching
+✅ Deployed secara publik di Netlify dengan HTTPS
+
+Teknologi yang digunakan:
+- Vanilla JavaScript dengan arsitektur MVP (Model-View-Presenter)
+- Service Worker untuk offline functionality dan push notifications
+- IndexedDB untuk local data storage dan favorites management
+- Leaflet.js untuk interactive maps dengan location selection
+- Progressive Web App dengan full install capability
+- Responsive design untuk mobile dan desktop compatibility
+
+Detail Implementation:
+- API Integration: Story API Dicoding (https://story-api.dicoding.dev/v1)
+- Push Notifications: VAPID keys dengan periodic dan welcome notifications
+- PWA Install: Manifest dengan 9 icon sizes, installable via browser prompt
+- Offline Mode: Cache-first strategy untuk assets, network-first untuk API
+- IndexedDB: 3 object stores (stories, favorites, offlineActions) dengan CRUD operations
+- Accessibility: Skip links, ARIA labels, semantic HTML, keyboard navigation
+- Performance: Code splitting, lazy loading, optimized assets
+
