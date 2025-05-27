@@ -292,69 +292,12 @@ const showInstallSuccessNotification = () => {
   }, 5000);
 };
 
-// Enhanced Service Worker Setup
-const setupServiceWorkerUpdates = async () => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'SKIP_WAITING') {
-        // Reload halaman ketika service worker baru siap
-        window.location.reload();
-      }
-    });
-  }
-};
-
-// Test Push Notification - TAMBAHAN BARU!
-const testPushNotification = () => {
-  // Test push notification setelah 10 detik aplikasi dimuat
-  setTimeout(async () => {
-    if (pushNotificationHelper.getPermissionStatus() === 'granted') {
-      await pushNotificationHelper.showLocalNotification(
-        'Selamat Datang di StoryApp!',
-        {
-          body: 'Aplikasi PWA Anda siap digunakan.',
-          icon: '/icons/icon-192x192.png',
-          tag: 'welcome-notification'
-        }
-      );
-    }
-  }, 10000);
-
-  // Periodically check for new stories and send notification
-  setInterval(async () => {
-    if (pushNotificationHelper.getPermissionStatus() === 'granted') {
-      // Simulasi notifikasi cerita baru (dalam proyek nyata, ini dari server)
-      const randomMessages = [
-        'Ada cerita baru dari Jakarta!',
-        'Cerita menarik dari Bali baru saja ditambahkan!',
-        'Seseorang berbagi cerita dari Yogyakarta!'
-      ];
-      
-      const randomMessage = randomMessages[Math.floor(Math.random() * randomMessages.length)];
-      
-      await pushNotificationHelper.showLocalNotification(
-        'StoryApp - Cerita Baru!',
-        {
-          body: randomMessage,
-          icon: '/icons/icon-192x192.png',
-          tag: 'new-story-notification',
-          badge: '/icons/icon-72x72.png',
-          data: { url: '/' }
-        }
-      );
-    }
-  }, 300000); // Setiap 5 menit untuk demo
-};
-
-// Initialize PWA features - DIPERBARUI!
+// Initialize PWA features
 const initializePWA = async () => {
   console.log('Initializing PWA features...');
   
   // Register Service Worker
   await registerServiceWorker();
-  
-  // Setup service worker updates
-  await setupServiceWorkerUpdates();
   
   // Initialize IndexedDB
   try {
@@ -377,9 +320,6 @@ const initializePWA = async () => {
   
   // Setup notification banner
   setupNotificationBanner();
-  
-  // Test push notification - BARU!
-  testPushNotification();
   
   console.log('PWA features initialized');
 };

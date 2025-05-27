@@ -21,9 +21,91 @@ export default class StoryDetailView {
     }
   }
 
+  // UPDATED METHOD - Tambah setup favorite button
   showStoryDetail(story) {
     if (!this._articleContainer) return;
     this._articleContainer.innerHTML = this._createStoryDetailTemplate(story);
+    
+    // Setup favorite button setelah render
+    this._setupFavoriteButton(story);
+  }
+
+  // NEW METHOD - Setup favorite button functionality
+  async _setupFavoriteButton(story) {
+    const favoriteButton = document.getElementById('favorite-button');
+    if (!favoriteButton) return;
+    
+    try {
+      // Import IndexedDB helper
+      const { default: indexedDBHelper } = await import('../../data/indexeddb-helper');
+      
+      // Check if already favorite
+      const isFavorite = await indexedDBHelper.isFavorite(story.id);
+      this._updateFavoriteButton(favoriteButton, isFavorite);
+      
+      // Add click handler
+      favoriteButton.addEventListener('click', async () => {
+        try {
+          const currentlyFavorite = await indexedDBHelper.isFavorite(story.id);
+          
+          if (currentlyFavorite) {
+            await indexedDBHelper.removeFromFavorites(story.id);
+            this._updateFavoriteButton(favoriteButton, false);
+            this._showNotification('Dihapus dari favorit', 'info');
+          } else {
+            await indexedDBHelper.addToFavorites(story);
+            this._updateFavoriteButton(favoriteButton, true);
+            this._showNotification('Ditambahkan ke favorit', 'success');
+          }
+        } catch (error) {
+          console.error('Error toggling favorite:', error);
+          this._showNotification('Gagal mengubah favorit', 'error');
+        }
+      });
+    } catch (error) {
+      console.error('Error setting up favorite button:', error);
+      // Hide button if there's an error
+      favoriteButton.style.display = 'none';
+    }
+  }
+
+  // NEW METHOD - Update button appearance
+  _updateFavoriteButton(button, isFavorite) {
+    if (isFavorite) {
+      button.innerHTML = '❤️ Hapus dari Favorit';
+      button.classList.add('favorited');
+    } else {
+      button.innerHTML = '🤍 Tambah ke Favorit';
+      button.classList.remove('favorited');
+    }
+  }
+
+  // NEW METHOD - Show notification
+  _showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      padding: 15px 20px;
+      background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
+      color: white;
+      border-radius: 8px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideInRight 0.3s ease;
+      max-width: 300px;
+      font-weight: 500;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'slideOutRight 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
   }
 
   showError(message) {
@@ -107,33 +189,42 @@ export default class StoryDetailView {
     }
   }
 
+  // UPDATED METHOD - Tambah favorite button ke template
   _createStoryDetailTemplate(story) {
-    return `
-      <header>
-        <h1 class="story-title" tabindex="0">${story.name}</h1>
-      </header>
-      
-      <div class="story-media">
-        <img 
-          src="${story.photoUrl}" 
-          alt="Foto cerita dari ${story.name}" 
-          class="story-image"
-          loading="lazy"
-        >
-      </div>
-      
-      <div class="story-meta">
-        <time class="story-date" datetime="${story.createdAt}">
-          Dipublikasikan pada ${this._formatDate(story.createdAt)}
-        </time>
-      </div>
-      
-      <section class="story-body">
-        <h2 class="sr-only">Isi Cerita</h2>
-        <p class="story-description">${story.description}</p>
-      </section>
-    `;
-  }
+  console.log('🎨 Creating story detail template for:', story.name);
+  
+  return `
+    <header>
+      <h1 class="story-title" tabindex="0">${story.name}</h1>
+    </header>
+    
+    <div class="story-actions">
+      <button id="favorite-button" class="favorite-button">
+        🤍 Tambah ke Favorit
+      </button>
+    </div>
+    
+    <div class="story-media">
+      <img 
+        src="${story.photoUrl}" 
+        alt="Foto cerita dari ${story.name}" 
+        class="story-image"
+        loading="lazy"
+      >
+    </div>
+    
+    <div class="story-meta">
+      <time class="story-date" datetime="${story.createdAt}">
+        Dipublikasikan pada ${this._formatDate(story.createdAt)}
+      </time>
+    </div>
+    
+    <section class="story-body">
+      <h2 class="sr-only">Isi Cerita</h2>
+      <p class="story-description">${story.description}</p>
+    </section>
+  `;
+}
 
   _formatDate(date) {
     return new Date(date).toLocaleDateString('id-ID', {
