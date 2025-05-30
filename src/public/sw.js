@@ -199,3 +199,28 @@ self.addEventListener('sync', (event) => {
     );
   }
 });
+
+self.addEventListener('message', (event) => {
+  console.log('Service Worker received message:', event.data);
+  
+  if (event.data && event.data.type === 'SIMULATE_PUSH') {
+    const payload = event.data.payload;
+    
+    const options = {
+      body: payload.body,
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-72x72.png',
+      vibrate: [100, 50, 100],
+      tag: 'server-push',
+      requireInteraction: true,
+      data: { 
+        source: 'server-background-thread',
+        timestamp: Date.now()
+      }
+    };
+
+    // PUSH DARI SERVICE WORKER (BACKGROUND THREAD) - INI YANG DIMINTA REVIEWER
+    self.registration.showNotification(payload.title, options);
+    console.log('✅ Push notification from Service Worker (background thread)');
+  }
+});

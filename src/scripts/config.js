@@ -6,7 +6,7 @@ const CONFIG = {
   
   // VAPID Public Key untuk Push Notification
   // Ganti dengan VAPID public key dari Story API Dicoding
-  VAPID_PUBLIC_KEY: 'BCR4m3OpgRZZKYYbrlMx8kIj9k8zEJnSdwOzEFLF8hhqyuOUwgAIGSoKwzHwelcPJk-IkFWiW12Cg4o2nNfojIw',
+  VAPID_PUBLIC_KEY: 'BKMHuSQwTEMuBrs-vD3rI5AoYaJCc_QRcdpvIbbgzc0aRWi_c85JAjCX4lOtz_9K3QYucMjVACDcJB-H4g5RwuY',
   
   // PWA Settings
   CACHE_NAME: 'storyapp-v1',

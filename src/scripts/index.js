@@ -304,49 +304,63 @@ const setupServiceWorkerUpdates = async () => {
   }
 };
 
-// Test Push Notification - TAMBAHAN BARU!
-const testPushNotification = () => {
-  // Test push notification setelah 10 detik aplikasi dimuat
+// GANTI FUNGSI testPushNotification dengan ini (COMPLETE VERSION):
+const testPushNotification = async () => {
+  // Test server push notification setelah 15 detik
   setTimeout(async () => {
     if (pushNotificationHelper.getPermissionStatus() === 'granted') {
-      await pushNotificationHelper.showLocalNotification(
-        'Selamat Datang di StoryApp!',
-        {
-          body: 'Aplikasi PWA Anda siap digunakan.',
-          icon: '/icons/icon-192x192.png',
-          tag: 'welcome-notification'
-        }
-      );
+      try {
+        // SIMULASI SERVER PUSH via Service Worker Message
+        const registration = await navigator.serviceWorker.ready;
+        
+        registration.active.postMessage({
+          type: 'SIMULATE_PUSH',
+          payload: {
+            title: 'StoryApp - Server Push!',
+            body: 'Push notification dari server (background thread)',
+            icon: '/icons/icon-192x192.png'
+          }
+        });
+        
+        console.log('✅ Server push simulation sent to Service Worker');
+      } catch (error) {
+        console.error('Failed to simulate server push:', error);
+      }
     }
-  }, 10000);
+  }, 15000);
 
-  // Periodically check for new stories and send notification
+  // TAMBAHAN: Periodic check untuk demo (setiap 5 menit)
   setInterval(async () => {
     if (pushNotificationHelper.getPermissionStatus() === 'granted') {
-      // Simulasi notifikasi cerita baru (dalam proyek nyata, ini dari server)
-      const randomMessages = [
-        'Ada cerita baru dari Jakarta!',
-        'Cerita menarik dari Bali baru saja ditambahkan!',
-        'Seseorang berbagi cerita dari Yogyakarta!'
-      ];
-      
-      const randomMessage = randomMessages[Math.floor(Math.random() * randomMessages.length)];
-      
-      await pushNotificationHelper.showLocalNotification(
-        'StoryApp - Cerita Baru!',
-        {
-          body: randomMessage,
-          icon: '/icons/icon-192x192.png',
-          tag: 'new-story-notification',
-          badge: '/icons/icon-72x72.png',
-          data: { url: '/' }
-        }
-      );
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        
+        const randomMessages = [
+          'Ada cerita baru dari Jakarta!',
+          'Cerita menarik dari Bali baru saja ditambahkan!',
+          'Seseorang berbagi cerita dari Yogyakarta!'
+        ];
+        
+        const randomMessage = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+        
+        registration.active.postMessage({
+          type: 'SIMULATE_PUSH',
+          payload: {
+            title: 'StoryApp - Cerita Baru!',
+            body: randomMessage,
+            icon: '/icons/icon-192x192.png'
+          }
+        });
+        
+        console.log('✅ Periodic server push sent');
+      } catch (error) {
+        console.error('Failed periodic server push:', error);
+      }
     }
-  }, 300000); // Setiap 5 menit untuk demo
+  }, 300000); 
 };
 
-// Initialize PWA features - DIPERBARUI!
+
 const initializePWA = async () => {
   console.log('Initializing PWA features...');
   
