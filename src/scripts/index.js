@@ -304,9 +304,9 @@ const setupServiceWorkerUpdates = async () => {
   }
 };
 
-// GANTI FUNGSI testPushNotification dengan ini (COMPLETE VERSION):
+// GANTI FUNGSI testPushNotification dengan ini (TIMING 30 DETIK):
 const testPushNotification = async () => {
-  // Test server push notification setelah 15 detik
+  // Test server push notification setelah 30 detik
   setTimeout(async () => {
     if (pushNotificationHelper.getPermissionStatus() === 'granted') {
       try {
@@ -327,9 +327,9 @@ const testPushNotification = async () => {
         console.error('Failed to simulate server push:', error);
       }
     }
-  }, 15000);
+  }, 30000); // 30 detik
 
-  // TAMBAHAN: Periodic check untuk demo (setiap 5 menit)
+  // TAMBAHAN: Periodic check untuk demo (setiap 10 menit)
   setInterval(async () => {
     if (pushNotificationHelper.getPermissionStatus() === 'granted') {
       try {
@@ -357,9 +357,8 @@ const testPushNotification = async () => {
         console.error('Failed periodic server push:', error);
       }
     }
-  }, 300000); 
+  }, 600000); // 10 menit
 };
-
 
 const initializePWA = async () => {
   console.log('Initializing PWA features...');
